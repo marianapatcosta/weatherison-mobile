@@ -8,7 +8,7 @@
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#f5ce42"
     },
     "updates": {
       "fallbackToCacheTimeout": 0
@@ -22,8 +22,11 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#FFFFFF"
-      }
+        "backgroundColor": "#f5ce42"
+        
+      },
+      "package": "com.marianapatcosta.weatherison",
+      "versionCode": 1
     },
     "web": {
       "favicon": "./assets/favicon.png"

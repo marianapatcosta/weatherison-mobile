@@ -1,0 +1,54 @@
+{
+  "header": {
+    "error": "Ocorreu um erro!",
+    "locationError": "A permissão para aceder à sua localização foi negada.",
+    "locationPlaceholder": "localidade e país",
+    "wordsToDelete": ["Região de", "Distrito de", "Município"],
+    "yourLocation": "localização atual"
+  },
+  "footer": {
+    "authorName": "Mariana Costa",
+    "developedBy": "Concebido e desenvolvido por",
+    "github": "https://github.com/marianapatcosta",
+    "linkedin": "https://www.linkedin.com/in/marianapatcosta"
+  },
+  "preferences": {
+    "apiError": "Não foi possível obter as fontes de previsão meteorológica. Por favor tente novamente.",
+    "apiSelectionError": "Pelo menos uma previsão deve estar selecionada!",
+    "celsius": "°C",
+    "english": "en",
+    "fahrenheit": "°F",
+    "language": "idioma",
+    "noApis": "Não há fontes de previsão meteorológica",
+    "on": "on",
+    "off": "off",
+    "portuguese": "pt",
+    "settings": "Definições",
+    "temperatureUnit": "temperatura",
+    "title": "Preferencias do Utilizador",
+    "weatherSources": "Fonte"
+  },
+  "weatherCard": {
+    "apparentTemp": "temperatura aparente",
+    "app": "apar",
+    "humidity": "humidade",
+    "moon": "fase lunar",
+    "notAvailable": "informação não disponível",
+    "precipIntensity": "intensidade precipitação",
+    "precipProbability": "probabilidade precipitação",
+    "pressCard": "Pressione para ver detalhes da previsão de {{apiName}}",
+    "source": "fonte- {{apiName}}",
+    "tMax": "temperatura máxima",
+    "tMin": "temperatura mínima",
+    "uv": "radiação UV",
+    "wind": "vento"
+  },
+  "weatherCompare": {
+    "timesToSelect": ["agora", "hoje", "amanhã"],
+    "weatherApisError": "Não foi possível obter dados de {{apis}}",
+    "weatherError": "Não foi possível obter dados de previsão meteorológica. Por favor tente novamente."
+  },
+  "weatherDetails": {
+    "title": "Previsão a 5 dias - {{apiName}}"
+  }
+}
