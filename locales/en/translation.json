@@ -1,0 +1,54 @@
+{
+  "header": {
+    "error": "An error occurred!",
+    "locationError": "Permission to access your location was denied.",
+    "locationPlaceholder": "city and country",
+    "wordsToDelete": ["Region", "District", "Municipality"],
+    "yourLocation": "your location"
+  },
+  "footer": {
+    "authorName": "Mariana Costa",
+    "developedBy": "Design and developed by",
+    "github": "https://github.com/marianapatcosta",
+    "linkedin": "https://www.linkedin.com/in/marianapatcosta"
+  },
+  "preferences": {
+    "apiError": "It was not possible to get weather sources. Please try again.",
+    "apiSelectionError": "At least one weather forecast should be selected!",
+    "celsius": "°C",
+    "english": "en",
+    "fahrenheit": "°F",
+    "language": "language",
+    "noApis": "No weather sources to display",
+    "on": "on",
+    "off": "off",
+    "portuguese": "pt",
+    "settings": "Settings",
+    "temperatureUnit": "temperature",
+    "title": "User Preferences",
+    "weatherSources": "Sources"
+  },
+  "weatherCard": {
+    "apparentTemp": "apparent temperature",
+    "app": "appar",
+    "humidity": "humidity",
+    "moon": "moon phase",
+    "notAvailable": "information not available",
+    "precipIntensity": "precipitation intensity",
+    "precipProbability": "precipitation probability",
+    "pressCard": "Press to see details of {{apiName}} forecast",
+    "source": "source - {{apiName}}",
+    "tMax": "maximum temperature",
+    "tMin": "minimum temperature",
+    "uv": "UV radiation",
+    "wind": "wind"
+  },
+  "weatherCompare": {
+    "timesToSelect": ["current", "today", "tomorrow"],
+    "weatherApisError": "It was not possible to get data from {{apis}}.",
+    "weatherError": "It was not possible to get weather forecast. Please try again."
+  },
+  "weatherDetails": {
+    "title": "5-days forecast - {{apiName}}"
+  }
+}
