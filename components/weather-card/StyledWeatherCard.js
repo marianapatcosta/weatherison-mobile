@@ -83,7 +83,7 @@ export const StyledWeatherDetails = styled.View`
   border-color: ${({ theme }) => theme.colors.primary};
   border-top-width: 1px;
   padding: 0 10px;
-  background-color: ${({ theme }) => theme.colors.lightGray};
+  background-color: ${({ theme }) => theme.colors.tertiary};
 `
 
 export const StyledWeatherDetailsColumn = styled.View`

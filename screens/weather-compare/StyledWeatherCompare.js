@@ -4,8 +4,12 @@ import { StyledRegularText } from '../../themes/global-styles'
 
 export const StyledWeatherCompare = styled.View``
 
+export const StyledHeaderIconLeft = styled.TouchableOpacity`
+  margin-left: 20px;
+`
+
 export const StyledHeader = styled.View`
- justify-content: center;
+  justify-content: center;
   position: relative;
 `
 
@@ -46,12 +50,9 @@ export const StyledInputWrapper = styled(Animated.View)`
   z-index: 2;
 `
 
-export const StyledInput = styled.TextInput.attrs({
-  placeholderStyle: (props) => ({
-    color: `${({ theme }) => theme.colors.highlight}`,
-  }),
-})`
+export const StyledInput = styled.TextInput`
   font-size: 14px;
+  color: ${({ theme }) => theme.colors.font};
   background-color: ${({ theme }) => theme.colors.primary};
   border-radius: 5px;
   padding: 5px 10px;

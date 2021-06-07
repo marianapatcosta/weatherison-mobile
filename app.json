@@ -1,13 +1,13 @@
 {
   "expo": {
-    "name": "weatherison-mobile",
-    "slug": "weatherison-mobile",
+    "name": "weatherison",
+    "slug": "weatherison",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "splash": {
       "image": "./assets/splash.png",
-      "resizeMode": "contain",
+      "resizeMode": "cover",
       "backgroundColor": "#f5ce42"
     },
     "updates": {
@@ -30,6 +30,7 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "userInterfaceStyle": "automatic"
   }
 }

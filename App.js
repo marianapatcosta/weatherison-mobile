@@ -5,13 +5,13 @@ import React, {
   useMemo,
   Fragment,
 } from 'react'
-import { Alert, Linking } from 'react-native'
+import { Alert, Linking, useColorScheme } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import AppLoading from 'expo-app-loading'
 import * as Location from 'expo-location'
 import Icon from 'react-native-vector-icons/FontAwesome5'
 import { NavigationContainer } from '@react-navigation/native'
-import { createStackNavigator } from '@react-navigation/stack'
+import { Assets, createStackNavigator } from '@react-navigation/stack'
 import { useFonts } from 'expo-font'
 import { ThemeProvider } from 'styled-components/native'
 import {
@@ -20,20 +20,19 @@ import {
   WeatherDetails,
 } from './screens/index.js'
 import { PreferencesContext } from './context/preferences-context.js'
-import basic from './themes/basic'
+import themes from './themes'
 import i18n from './i18n'
+import { APIS } from './constants.js'
 import {
   StyledHeaderTitleWrapper,
   StyledHeaderTitle,
   StyledHeaderIcon,
-  StyledHeaderIconLeft,
   StyledFooter,
   StyledFooterWrapper,
   StyledFooterLinksWrapper,
   StyledFooterText,
   StyledLink,
 } from './StyledApp.js'
-import { APIS } from './constants.js'
 
 export default App = () => {
   const RootStack = createStackNavigator()
@@ -43,12 +42,13 @@ export default App = () => {
   const [isPt, setIsPt] = useState(i18n.locale === 'pt')
   const [isFahrenheit, setIsFahrenheit] = useState(false)
   const [selectedLocation, setSelectedLocation] = useState('')
-  const [showDefineNewLocation, setShowDefineNewLocation] = useState(false)
   const [selectedApis, setSelectedApis] = useState([
     APIS.CLIMA_CELL,
     APIS.DARK_SKY,
     APIS.OPEN_WEATHER,
   ])
+  const deviceTheme = useColorScheme()
+  const theme = themes[deviceTheme] || themes.light
 
   const toggleLocale = async (isPt) => {
     try {
@@ -91,8 +91,6 @@ export default App = () => {
       setLocationParams,
       selectedLocation,
       setSelectedLocation,
-      showDefineNewLocation,
-      setShowDefineNewLocation,
     }),
     [
       isPt,
@@ -100,7 +98,6 @@ export default App = () => {
       selectedApis,
       selectedLocation,
       locationParams,
-      showDefineNewLocation,
     ]
   )
 
@@ -141,19 +138,22 @@ export default App = () => {
   }, [setLocationParams])
 
   useEffect(() => {
+    let unmount = false
+    if (unmount) return
     getLocalStoredData()
     getCurrentLocation()
+    return () => (unmount = true)
   }, [getLocalStoredData, getCurrentLocation])
 
   const getDefaultTitle = () => (
     <StyledHeaderTitleWrapper translate='no'>
       <Fragment>
         <StyledHeaderTitle>WEA</StyledHeaderTitle>
-        <Icon name='umbrella' size={20} color={basic.colors.font} />
+        <Icon name='umbrella' size={20} color={theme.colors.font} />
         <StyledHeaderTitle>HER</StyledHeaderTitle>
-        <Icon name='bolt' size={20} color={basic.colors.font} />
+        <Icon name='bolt' size={20} color={theme.colors.font} />
         <StyledHeaderTitle>S</StyledHeaderTitle>
-        <Icon name='sun' size={20} color={basic.colors.highlight} />
+        <Icon name='sun' size={20} color={theme.colors.highlight} />
         <StyledHeaderTitle>N</StyledHeaderTitle>
       </Fragment>
     </StyledHeaderTitleWrapper>
@@ -161,11 +161,11 @@ export default App = () => {
 
   const headerConfigs = () => ({
     headerStyle: {
-      backgroundColor: basic.colors.secondary,
+      backgroundColor: theme.colors.secondary,
     },
-    headerTintColor: basic.colors.font,
+    headerTintColor: theme.colors.font,
     headerTitleStyle: {
-      fontFamily: basic.fonts.emphasis,
+      fontFamily: theme.fonts.emphasis,
       alignSelf: 'center',
       justifyContent: 'space-between',
     },
@@ -183,13 +183,13 @@ export default App = () => {
           onPress={() => Linking.openURL(t('footer.github'))}
           accessibilityLabel={`go to ${t('footer.authorName')}'s Github`}
         >
-          <Icon name='github' size={23} color={basic.colors.font} />
+          <Icon name='github' size={23} color={theme.colors.font} />
         </StyledLink>
         <StyledLink
           onPress={() => Linking.openURL(t('footer.linkedin'))}
           accessibilityLabel={`go to ${t('footer.authorName')}'s Linkedin`}
         >
-          <Icon name='linkedin' size={23} color={basic.colors.font} />
+          <Icon name='linkedin' size={23} color={theme.colors.font} />
         </StyledLink>
       </StyledFooterLinksWrapper>
     </StyledFooter>
@@ -201,33 +201,16 @@ export default App = () => {
         ...headerConfigs(),
         title: selectedLocation || getDefaultTitle(),
         headerMode: 'screen',
-        cardStyle: { backgroundColor: basic.colors.highlight },
+        cardStyle: { backgroundColor: theme.colors.highlight },
         headerRight: () => (
           <StyledHeaderIcon onPress={() => navigation.push('UserPreferences')}>
-            <Icon name='ellipsis-v' size={22} color={basic.colors.highlight} />
+            <Icon name='ellipsis-v' size={22} color={theme.colors.highlight} />
           </StyledHeaderIcon>
         ),
       })}
     >
       <MainStack.Screen
         name='WeatherCompare'
-        options={{
-          headerLeft: () => (
-            <StyledHeaderIconLeft
-              onPress={() =>
-                setShowDefineNewLocation(
-                  (prevShowDefineNewLocation) => !prevShowDefineNewLocation
-                )
-              }
-            >
-              <Icon
-                name='search-location'
-                size={22}
-                color={basic.colors.highlight}
-              />
-            </StyledHeaderIconLeft>
-          ),
-        }}
       >
         {(props) => (
           <WeatherCompare
@@ -274,7 +257,7 @@ export default App = () => {
   }
 
   return (
-    <ThemeProvider theme={basic}>
+    <ThemeProvider theme={theme}>
       <PreferencesContext.Provider value={preferencesContext}>
         <NavigationContainer>
           <RootStack.Navigator mode='modal' screenOptions={headerConfigs}>
@@ -289,7 +272,7 @@ export default App = () => {
               options={{
                 ...headerConfigs(),
                 title: t('preferences.title'),
-                cardStyle: { backgroundColor: basic.colors.highlight },
+                cardStyle: { backgroundColor: theme.colors.highlight },
                 headerTitleContainerStyle: {
                   left: 0,
                 },

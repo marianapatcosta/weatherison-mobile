@@ -2,12 +2,12 @@ import React, { useContext, Fragment } from 'react'
 import Icon from 'react-native-vector-icons/FontAwesome5'
 import { APIS } from '../../constants'
 import { PreferencesContext } from '../../context/preferences-context'
-import basic from '../../themes/basic'
 import {
   StyledRegularText,
   StyledSubText,
   StyledTitleText,
 } from '../../themes/global-styles'
+import { useTheme } from 'styled-components';
 import {
   getMoonPhase,
   getRelativeUnits,
@@ -37,6 +37,7 @@ import {
 
 const WeatherCard = ({ weatherInfo, apiName, selectedTime, onPress }) => {
   const { t, isFahrenheit } = useContext(PreferencesContext)
+  const theme = useTheme();
 
   const getIcon = (apiName, icon) => {
     try {
@@ -57,7 +58,7 @@ const WeatherCard = ({ weatherInfo, apiName, selectedTime, onPress }) => {
         {getTemperatureUnits(weatherInfo.temperature, isFahrenheit)}
       </StyledCurrentTemperature>
       <StyledIconTextWrapper>
-        <Icon name='thermometer-half' size={16} color={basic.colors.font} />
+        <Icon name='thermometer-half' size={16} color={theme.colors.font} />
         <StyledSubText>{t('weatherCard.app')}</StyledSubText>
         <StyledRegularText>
           {getTemperatureUnits(weatherInfo.apparentTemperature, isFahrenheit)}
@@ -69,18 +70,14 @@ const WeatherCard = ({ weatherInfo, apiName, selectedTime, onPress }) => {
   const renderTemperature = () => (
     <StyledTemperature>
       <StyledIconTextWrapper>
-        <StyledIcon
-          name='temperature-low'
-          size={16}
-          color={basic.colors.blue}
-        />
+        <StyledIcon name='temperature-low' size={16} color='#afccf1' />
         <StyledRegularText>
           {getTemperatureUnits(weatherInfo.temperatureMin, isFahrenheit)}
         </StyledRegularText>
       </StyledIconTextWrapper>
 
       <StyledIconTextWrapper>
-        <StyledIcon name='temperature-high' size={16} color={'#b33030'} />
+        <StyledIcon name='temperature-high' size={16} color='#b33030' />
 
         <StyledRegularText>
           {getTemperatureUnits(weatherInfo.temperatureMax, isFahrenheit)}
@@ -110,7 +107,7 @@ const WeatherCard = ({ weatherInfo, apiName, selectedTime, onPress }) => {
     <StyledWeatherDetails>
       <StyledWeatherDetailsColumn>
         <StyledIconTextWrapper>
-          <StyledIcon name='wind' size={17} color={basic.colors.font} />
+          <StyledIcon name='wind' size={17} color={theme.colors.font} />
           <StyledWeatherText>
             {`${getWindUnits(weatherInfo.windSpeed)} ${
               weatherInfo.windDirection || '-'
@@ -129,7 +126,7 @@ const WeatherCard = ({ weatherInfo, apiName, selectedTime, onPress }) => {
           </StyledWeatherText>
         </StyledIconTextWrapper>
         <StyledIconTextWrapper>
-          <StyledIcon name='moon' size={16} color={basic.colors.font} />
+          <StyledIcon name='moon' size={16} color={theme.colors.font} />
           <StyledWeatherText>
             {getMoonPhase(weatherInfo.moonPhase)}
           </StyledWeatherText>
@@ -137,19 +134,19 @@ const WeatherCard = ({ weatherInfo, apiName, selectedTime, onPress }) => {
       </StyledWeatherDetailsColumn>
       <StyledWeatherDetailsColumn>
         <StyledIconTextWrapper>
-          <StyledIcon name='tint' size={16} color={basic.colors.font} />
+          <StyledIcon name='tint' size={16} color={theme.colors.font} />
           <StyledWeatherText>
             {getRelativeUnits(weatherInfo.humidity)}
           </StyledWeatherText>
         </StyledIconTextWrapper>
         <StyledIconTextWrapper>
-          <StyledIcon name='cloud-rain' size={16} color={basic.colors.font} />
+          <StyledIcon name='cloud-rain' size={16} color={theme.colors.font} />
           <StyledWeatherText>
             {getRelativeUnits(weatherInfo.precipitationIntensity)}
           </StyledWeatherText>
         </StyledIconTextWrapper>
         <StyledIconTextWrapper>
-          <Icon name='umbrella' size={16} color={basic.colors.font} />
+          <Icon name='umbrella' size={16} color={theme.colors.font} />
           <StyledWeatherText style={{ paddingRight: 5, fontWeight: '700' }}>
             ?
           </StyledWeatherText>
@@ -165,7 +162,9 @@ const WeatherCard = ({ weatherInfo, apiName, selectedTime, onPress }) => {
     <Fragment>
       {renderWeatherInfoHeader()}
       {renderWeatherDetails()}
-      {!!onPress && <StyledSourceText>{apiName.split('-').join(' ')}</StyledSourceText>}
+      {!!onPress && (
+        <StyledSourceText>{apiName.split('-').join(' ')}</StyledSourceText>
+      )}
     </Fragment>
   )
 
