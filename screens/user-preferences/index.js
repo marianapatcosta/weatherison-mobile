@@ -6,13 +6,12 @@ import React, {
   useMemo,
 } from 'react'
 import { View, Alert, RefreshControl } from 'react-native'
-import {
-  FlatList,
-} from 'react-native-gesture-handler'
+import { FlatList } from 'react-native-gesture-handler'
 import { Switch } from 'react-native-switch'
+import { useTheme } from 'styled-components'
 import { PreferencesContext } from '../../context/preferences-context'
-import basic from '../../themes/basic'
 import { StyledRegularText, StyledTitleText } from '../../themes/global-styles'
+import ENV_VARS from '../../variables'
 import {
   StyledUserPreferences,
   StyledUserPreferencesContent,
@@ -35,40 +34,43 @@ const UserPreferences = () => {
     selectedApis,
     updateSelectedApis,
   } = useContext(PreferencesContext)
+  const theme = useTheme()
 
   const switchStyles = () => ({
     circleBorderWidth: 0,
     circleSize: 25,
     barHeight: 20,
     activeTextStyle: {
-      color: basic.colors.white,
-      fontFamily: basic.fonts.body,
+      color: theme.colors.secondary,
+      fontFamily: theme.fonts.body,
       paddingBottom: 2,
     },
     inactiveTextStyle: {
-      color: basic.colors.font,
-      fontFamily: basic.fonts.body,
+      color: theme.colors.font,
+      fontFamily: theme.fonts.body,
       paddingBottom: 2,
     },
-    backgroundInactive: basic.colors.secondary,
-    backgroundActive: basic.colors.font,
-    circleInActiveColor: basic.colors.highlight,
-    circleActiveColor: basic.colors.highlight,
+    backgroundInactive: theme.colors.secondary,
+    backgroundActive: theme.colors.font,
+    circleInActiveColor: theme.colors.highlight,
+    circleActiveColor: theme.colors.highlight,
     switchLeftPx: 5,
     switchRightPx: 5,
     changeValueImmediately: true,
   })
 
-  const fetchApis = useCallback(async () => {
+  const fetchApis = useCallback(async (signal) => {
     try {
       setIsLoading(true)
-      const response = await fetch('http://192.168.1.83:8000/api/v1/apis')
+      const response = await fetch(`${ENV_VARS.API_URL}/apis`, {
+        signal,
+      })
       if (response.ok) {
         const apis = await response.json()
         setApis(apis)
       }
     } catch (error) {
-      Alert.alert( t('header.error'), t('preferences.apiError'))
+      Alert.alert(t('header.error'), t('preferences.apiError'))
     } finally {
       setIsLoading(false)
     }
@@ -104,7 +106,10 @@ const UserPreferences = () => {
   }, [])
 
   useEffect(() => {
-    fetchApis()
+    const httAbortController = new AbortController()
+    fetchApis(httAbortController.signal)
+
+    return () => httAbortController.abort()
   }, [fetchApis])
 
   const renderApis = () => {

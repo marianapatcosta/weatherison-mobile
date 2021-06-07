@@ -14,10 +14,6 @@ export const StyledHeaderIcon = styled.TouchableOpacity`
   margin-right: 20px;
 `
 
-export const StyledHeaderIconLeft = styled.TouchableOpacity`
-  margin-left: 20px;
-`
-
 export const StyledFooter = styled.View`
   width: 100%;
   background-color: ${({ theme }) => theme.colors.secondary};
