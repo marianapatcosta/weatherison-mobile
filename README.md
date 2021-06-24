@@ -1,6 +1,6 @@
 # weatherison mobile
 
-Mobile app developed with React NAtive, Expo and Styled Components to compare the weather forecast retrieved from the following weather APIs:
+Mobile app developed with React Native, Expo and Styled Components to compare the weather forecast retrieved from the following weather APIs:
 
 - accuweather
 - dark sky
