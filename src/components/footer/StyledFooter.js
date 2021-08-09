@@ -1,18 +1,5 @@
 import styled from 'styled-components/native'
-import { StyledRegularText, StyledTitleText } from './themes/global-styles'
-
-export const StyledHeaderTitleWrapper = styled.View`
-  flex-direction: row;
-  align-items: center;
-`
-
-export const StyledHeaderTitle = styled(StyledTitleText)`
-  font-size: 22px;
-`
-
-export const StyledHeaderIcon = styled.TouchableOpacity`
-  margin-right: 20px;
-`
+import { StyledRegularText } from '../../themes/global-styles'
 
 export const StyledFooter = styled.View`
   width: 100%;
