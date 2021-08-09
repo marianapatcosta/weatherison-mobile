@@ -3,6 +3,7 @@
     "error": "Ocorreu um erro!",
     "locationError": "A permissão para aceder à sua localização foi negada.",
     "locationPlaceholder": "localidade e país",
+    "noLocationError": "Não foi possível obter a sua localização.",
     "wordsToDelete": ["Região de", "Distrito de", "Município"],
     "yourLocation": "localização atual"
   },

@@ -3,12 +3,13 @@
     "error": "An error occurred!",
     "locationError": "Permission to access your location was denied.",
     "locationPlaceholder": "city and country",
+    "noLocationError": "It was not possible to get your location.",
     "wordsToDelete": ["Region", "District", "Municipality"],
     "yourLocation": "your location"
   },
   "footer": {
     "authorName": "Mariana Costa",
-    "developedBy": "Design and developed by",
+    "developedBy": "Designed and developed by",
     "github": "https://github.com/marianapatcosta",
     "linkedin": "https://www.linkedin.com/in/marianapatcosta"
   },

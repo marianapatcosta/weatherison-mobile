@@ -1,7 +1,7 @@
-import React, { useContext, useEffect } from 'react'
+import React, { useEffect } from 'react'
 import { View } from 'react-native'
 import { WeatherCard } from '../../components'
-import { PreferencesContext } from '../../context/preferences-context'
+import i18n from '../../i18n'
 import { getDate } from '../../utils'
 import {
   StyledWeatherDetails,
@@ -11,14 +11,17 @@ import {
 } from './StyledWeatherDetails.js'
 
 const WeatherDetails = ({ route, navigation }) => {
-  const { weatherDetailsData, apiName } = route.params
-  const { t, isPt, selectedLocation } = useContext(PreferencesContext)
-  useEffect(() => navigation.setOptions({ title: selectedLocation }), [selectedLocation])
+  const { weatherDetailsData, apiName, selectedLocation } = route.params
+  const isPt = i18n.locale === 'pt'
+  useEffect(
+    () => navigation.setOptions({ title: selectedLocation }),
+    [selectedLocation]
+  )
 
   return (
     <StyledWeatherDetails>
       <StyledTitle>
-        {t('weatherDetails.title', {
+        {i18n.t('weatherDetails.title', {
           apiName: apiName.toUpperCase().split('-').join(' '),
         })}
       </StyledTitle>
@@ -30,10 +33,10 @@ const WeatherDetails = ({ route, navigation }) => {
         renderItem={({ item }) => (
           <View>
             <StyledDate>{getDate(item.time, isPt)}</StyledDate>
-            <WeatherCard weatherInfo={item} apiName={apiName}/>
+            <WeatherCard weatherInfo={item} apiName={apiName} />
           </View>
         )}
-        ListFooterComponent={ <View style={{ margin: 30 }} />}
+        ListFooterComponent={<View style={{ margin: 30 }} />}
       />
     </StyledWeatherDetails>
   )

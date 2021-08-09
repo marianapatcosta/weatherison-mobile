@@ -15,3 +15,5 @@ export const WEATHER_FORECAST_TIMES = {
   IN_3_DAYS: 'in3Days',
   IN_4_DAYS: 'in4Days',
 }
+
+export const API_URL = 'https://weatherison.herokuapp.com/api/v1/'

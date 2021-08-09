@@ -4,61 +4,78 @@ import React, {
   useEffect,
   useMemo,
   useState,
-  useRef,
   useLayoutEffect,
 } from 'react'
-import { Alert, Animated, Dimensions, RefreshControl, View } from 'react-native'
+import { Alert, RefreshControl, View } from 'react-native'
 import Icon from 'react-native-vector-icons/FontAwesome5'
-import { useTheme } from 'styled-components'
+import { useTheme } from 'styled-components/native'
+import * as Location from 'expo-location'
 import 'allsettled-polyfill'
-import { WeatherCard, WeatherCardPlaceholder } from '../../components'
-import { WEATHER_FORECAST_TIMES } from '../../constants'
+import {
+  DefaultTitle,
+  DefineLocation,
+  DefineTime,
+  WeatherCard,
+  WeatherCardPlaceholder,
+} from '../../components'
+import { WEATHER_FORECAST_TIMES, API_URL } from '../../constants'
 import { PreferencesContext } from '../../context/preferences-context'
 import { getLocation } from '../../utils'
-import ENV_VARS from '../../variables'
+import i18n from '../../i18n'
 import {
+  StyledHeaderIconRight,
   StyledHeaderIconLeft,
   StyledHeader,
   StyledWeatherCompare,
-  StyledForecastTimes,
-  StyledForecastTime,
-  StyledForecastTimeText,
   StyledWeatherCards,
   StyledNotAvailable,
-  StyledInput,
-  StyledLocationButton,
-  StyledInputWrapper,
 } from './StyledWeatherCompare.js'
 
-const WeatherCompare = ({
-  navigation,
-  getDefaultTitle,
-  getCurrentLocation,
-}) => {
-  const {
-    t,
-    isPt,
-    selectedApis,
-    locationParams,
-    setLocationParams,
-    setSelectedLocation,
-  } = useContext(PreferencesContext)
+const WeatherCompare = ({ navigation }) => {
+  const { selectedApis } = useContext(PreferencesContext)
+  const isPt = i18n.locale === 'pt'
+  const t = i18n.t
   const [selectedTime, setSelectedTime] = useState(
     WEATHER_FORECAST_TIMES.CURRENT
   )
-  const [activeButtonIndex, setActiveButtonIndex] = useState(0)
   const [weatherResponses, setWeatherResponses] = useState()
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
   const [isRefreshing, setIsRefreshing] = useState(false)
-  const [noData, setNoData] = useState(false)
   const [newLocation, setNewLocation] = useState('')
   const theme = useTheme()
-  const moveAnimation = useRef(new Animated.Value(0)).current
   const [showDefineNewLocation, setShowDefineNewLocation] = useState(false)
-  const translateXAnimation = moveAnimation.interpolate({
-    inputRange: [0, 1],
-    outputRange: [Dimensions.get('screen').width, 0],
-  })
+  const [selectedLocation, setSelectedLocation] = useState('')
+  const [locationParams, setLocationParams] = useState()
+
+  const weatherInfoForSelectedTime = useMemo(
+    () =>
+      weatherResponses
+        ? weatherResponses.map((response) => ({
+            weatherInfo: response[selectedTime],
+            apiName: response.apiName,
+          }))
+        : [],
+    [weatherResponses, selectedTime]
+  )
+
+  const getCurrentLocation = useCallback(async () => {
+    const { status } = await Location.requestForegroundPermissionsAsync()
+    if (status !== 'granted') {
+      return Alert.alert(t('header.error'), t('header.locationError'))
+    }
+
+    try {
+      const locationParams = await Location.getCurrentPositionAsync({
+        timeout: 5000,
+      })
+      setLocationParams({
+        latitude: locationParams.coords.latitude,
+        longitude: locationParams.coords.longitude,
+      })
+    } catch (error) {
+      return Alert.alert(t('header.error'), t('header.locationError'))
+    }
+  }, [setLocationParams])
 
   const getRejectedApis = (responses) => {
     const rejectedApisIndexes = responses
@@ -68,7 +85,7 @@ const WeatherCompare = ({
       .filter((index) => index !== undefined)
     if (rejectedApisIndexes.length) {
       const rejectedApis = selectedApis
-        .filter((api, index) =>
+        .filter((_, index) =>
           rejectedApisIndexes.join(', ').includes('' + index)
         )
         .map((api) => api)
@@ -82,25 +99,29 @@ const WeatherCompare = ({
         )
     }
   }
+
   const getLocationQueryParameters = () => {
-    let queryString
+    let queryString = ''
     for (const param in locationParams) {
-      queryString = `${queryString}&${param}=${locationParams[param]}`
+      queryString = `${queryString && `${queryString}&`}${param}=${
+        locationParams[param]
+      }`
     }
     return queryString
   }
 
   const fetchWeatherForecastData = useCallback(
     async (signal) => {
+      const locationQueryParameters = getLocationQueryParameters()
+      if (!locationQueryParameters) return
       try {
         setIsLoading(true)
         const responses = await Promise.allSettled(
           selectedApis.map(async (api) => {
-            // weatherison.herokuapp.com
             const response = await fetch(
-              `${ENV_VARS.API_URL}/weather?&apiName=${api}&lang=${
+              `${API_URL}weather?&apiName=${api}&lang=${
                 isPt ? 'pt' : 'en'
-              }&${getLocationQueryParameters()}`,
+              }&${locationQueryParameters}`,
               { signal }
             )
             const responseData = await response.json()
@@ -117,20 +138,8 @@ const WeatherCompare = ({
             }
           })
         )
-        const responsesData = responses
-          .map((response) => response.value)
-          .filter((response) => response)
-        setWeatherResponses(responsesData)
-        const location = getLocation(
-          responsesData?.find((response) => response)?.location || '',
-          isPt,
-          t('header.wordsToDelete')
-        )
-        setSelectedLocation(location)
-        navigation.setOptions({ title: location || getDefaultTitle() })
-        getRejectedApis(responses)
+        handleFetchWeatherForecastSuccess(responses)
       } catch (error) {
-        setNoData(true)
         Alert.alert(t('header.error'), t('weatherCompare.weatherError'))
       } finally {
         setIsLoading(false)
@@ -139,18 +148,24 @@ const WeatherCompare = ({
     [selectedApis, getRejectedApis]
   )
 
+  const handleFetchWeatherForecastSuccess = (responses) => {
+    const responsesData = responses
+      .map((response) => response.value)
+      .filter((response) => response)
+    setWeatherResponses(responsesData)
+    const location = getLocation(
+      responsesData?.find((response) => response)?.location || '',
+      isPt,
+      t('header.wordsToDelete')
+    )
+    setSelectedLocation(location)
+    navigation.setOptions({ title: location })
+    getRejectedApis(responses)
+  }
+
   const handleForecastTimePress = (index) => {
     setSelectedTime(Object.values(WEATHER_FORECAST_TIMES)[index])
-    setActiveButtonIndex(index)
   }
-  const weatherInfoForSelectedTime = useMemo(
-    () =>
-      weatherResponses?.map((response) => ({
-        weatherInfo: response[selectedTime],
-        apiName: response.apiName,
-      })),
-    [weatherResponses, selectedTime]
-  )
 
   const handleCardPress = (index) => {
     const times = Object.values(WEATHER_FORECAST_TIMES)
@@ -159,7 +174,11 @@ const WeatherCompare = ({
       (time) => weatherResponses[index][time]
     )
     const apiName = weatherResponses[index].apiName
-    navigation.push('WeatherDetails', { weatherDetailsData, apiName })
+    navigation.push('WeatherDetails', {
+      weatherDetailsData,
+      apiName,
+      selectedLocation,
+    })
   }
 
   const handleRefresh = useCallback(async () => {
@@ -171,19 +190,27 @@ const WeatherCompare = ({
   }, [])
 
   const handleCurrentLocationClick = () => {
-    setShowDefineNewLocation(false)
     getCurrentLocation()
     setSelectedLocation('')
     setShowDefineNewLocation(false)
   }
 
   const handleOnSubmitNewLocation = () => {
-    navigation.setOptions({ title: getDefaultTitle() })
+    navigation.setOptions({ title: <DefaultTitle /> })
     setLocationParams({ location: newLocation })
     setSelectedLocation('')
     setNewLocation('')
     setShowDefineNewLocation(false)
   }
+
+  const toggleShowDefineNewLocation = () =>
+    setShowDefineNewLocation(
+      (prevShowDefineNewLocation) => !prevShowDefineNewLocation
+    )
+
+  useEffect(() => {
+    getCurrentLocation()
+  }, [])
 
   useEffect(() => {
     let isUnmounted = false
@@ -196,19 +223,6 @@ const WeatherCompare = ({
     }
   }, [selectedApis, isPt, locationParams])
 
-  useEffect(() => {
-    Animated.timing(moveAnimation, {
-      toValue: showDefineNewLocation ? 1 : 0,
-      duration: 500,
-      useNativeDriver: true,
-    }).start()
-  }, [showDefineNewLocation])
-
-  const toggleShowDefineNewLocation = () =>
-    setShowDefineNewLocation(
-      (prevShowDefineNewLocation) => !prevShowDefineNewLocation
-    )
-
   useLayoutEffect(() => {
     navigation.setOptions({
       headerLeft: () => (
@@ -220,59 +234,28 @@ const WeatherCompare = ({
           />
         </StyledHeaderIconLeft>
       ),
+      headerRight: () => (
+        <StyledHeaderIconRight
+          onPress={() => navigation.push('UserPreferences')}
+        >
+          <Icon name='ellipsis-v' size={22} color={theme.colors.highlight} />
+        </StyledHeaderIconRight>
+      ),
     })
   }, [navigation, toggleShowDefineNewLocation])
 
-  const renderDefineTime = () => (
-    <StyledForecastTimes
-      numColumns={3}
-      data={t('weatherCompare.timesToSelect')}
-      keyExtractor={(item) => item}
-      renderItem={({ item, index }) => (
-        <StyledForecastTime onPress={() => handleForecastTimePress(index)}>
-          <StyledForecastTimeText isActive={activeButtonIndex === index}>
-            {item}
-          </StyledForecastTimeText>
-        </StyledForecastTime>
-      )}
-    />
-  )
-
-  const renderDefineLocation = () => (
-    <StyledInputWrapper
-      style={{
-        transform: [{ translateX: translateXAnimation }],
-      }}
-    >
-      <StyledInput
-        value={newLocation}
-        onChangeText={setNewLocation}
-        onSubmitEditing={handleOnSubmitNewLocation}
-        placeholder={t('header.locationPlaceholder')}
-        placeholderTextColor={theme.colors.font}
-      />
-      <StyledLocationButton onPress={handleCurrentLocationClick}>
-        <Icon name='map-marker-alt' size={22} color={theme.colors.font} />
-      </StyledLocationButton>
-    </StyledInputWrapper>
-  )
-
-  const renderHeader = () => (
-    <StyledHeader>
-      {renderDefineLocation()}
-      {renderDefineTime()}
-    </StyledHeader>
-  )
-
   const renderMain = () => {
-    if (noData) {
+    if (isLoading) {
       return (
-        <StyledNotAvailable>
-          <WeatherCard />
-        </StyledNotAvailable>
+        <StyledWeatherCards
+          data={Array(2).fill('')}
+          keyExtractor={(_, index) => `weather-placeholder-${index}`}
+          renderItem={() => <WeatherCardPlaceholder />}
+        ></StyledWeatherCards>
       )
     }
-    if (!!weatherInfoForSelectedTime) {
+
+    if (!!weatherInfoForSelectedTime?.length) {
       return (
         <StyledWeatherCards
           showsVerticalScrollIndicator={false}
@@ -297,18 +280,26 @@ const WeatherCompare = ({
         />
       )
     }
+
     return (
-      <StyledWeatherCards
-        data={Array(2).fill('')}
-        keyExtractor={(item, index) => `weather-placeholder-${index}`}
-        renderItem={() => <WeatherCardPlaceholder />}
-      />
+      <StyledNotAvailable>
+        <WeatherCard />
+      </StyledNotAvailable>
     )
   }
 
   return (
     <StyledWeatherCompare>
-      {renderHeader()}
+      <StyledHeader>
+        <DefineLocation
+          location={newLocation}
+          showDefineNewLocation={showDefineNewLocation}
+          onChangeLocation={setNewLocation}
+          handleOnSubmitNewLocation={handleOnSubmitNewLocation}
+          handleCurrentLocationClick={handleCurrentLocationClick}
+        />
+        <DefineTime handleForecastTimePress={handleForecastTimePress} />
+      </StyledHeader>
       {renderMain()}
     </StyledWeatherCompare>
   )

@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import React, {
   useEffect,
   useState,
@@ -7,11 +8,11 @@ import React, {
 } from 'react'
 import { View, Alert, RefreshControl } from 'react-native'
 import { FlatList } from 'react-native-gesture-handler'
-import { Switch } from 'react-native-switch'
-import { useTheme } from 'styled-components'
+import { Switch } from '../../components'
 import { PreferencesContext } from '../../context/preferences-context'
-import { StyledRegularText, StyledTitleText } from '../../themes/global-styles'
-import ENV_VARS from '../../variables'
+import i18n from '../../i18n'
+import { StyledTitleText } from '../../themes/global-styles'
+import { API_URL } from '../../constants'
 import {
   StyledUserPreferences,
   StyledUserPreferencesContent,
@@ -25,44 +26,19 @@ const UserPreferences = () => {
   const [apis, setApis] = useState([])
   const [isLoading, setIsLoading] = useState(false)
   const [isRefreshing, setIsRefreshing] = useState(false)
+  const [isPt, setIsPt] = useState(i18n.locale === 'pt')
   const {
-    t,
-    isPt,
-    toggleLocale,
     isFahrenheit,
     toggleTemperatureUnits,
     selectedApis,
     updateSelectedApis,
   } = useContext(PreferencesContext)
-  const theme = useTheme()
-
-  const switchStyles = () => ({
-    circleBorderWidth: 0,
-    circleSize: 25,
-    barHeight: 20,
-    activeTextStyle: {
-      color: theme.colors.secondary,
-      fontFamily: theme.fonts.body,
-      paddingBottom: 2,
-    },
-    inactiveTextStyle: {
-      color: theme.colors.font,
-      fontFamily: theme.fonts.body,
-      paddingBottom: 2,
-    },
-    backgroundInactive: theme.colors.secondary,
-    backgroundActive: theme.colors.font,
-    circleInActiveColor: theme.colors.highlight,
-    circleActiveColor: theme.colors.highlight,
-    switchLeftPx: 5,
-    switchRightPx: 5,
-    changeValueImmediately: true,
-  })
+  const t = i18n.t
 
   const fetchApis = useCallback(async (signal) => {
     try {
       setIsLoading(true)
-      const response = await fetch(`${ENV_VARS.API_URL}/apis`, {
+      const response = await fetch(`${API_URL}apis`, {
         signal,
       })
       if (response.ok) {
@@ -84,6 +60,16 @@ const UserPreferences = () => {
       })),
     [apis, selectedApis]
   )
+
+  const toggleLocale = async (isPt) => {
+    try {
+      i18n.locale = isPt ? 'pt' : 'en'
+      setIsPt(isPt)
+      await AsyncStorage.setItem('isPt', JSON.stringify(isPt))
+    } catch (error) {
+      console.error(error)
+    }
+  }
 
   const handleSelectedApisUpdate = (value, index) => {
     const apiToUpdate = apisToRender[index]
@@ -117,7 +103,7 @@ const UserPreferences = () => {
       return (
         <FlatList
           data={Array(5).fill(5)}
-          keyExtractor={(item, index) => `api-placeholder-${index}`}
+          keyExtractor={(_, index) => `api-placeholder-${index}`}
           renderItem={() => (
             <StyledSwitchWrapper>
               <StyledSwitchLabelPlaceholder />
@@ -134,18 +120,15 @@ const UserPreferences = () => {
           data={apisToRender}
           keyExtractor={(item) => item.name}
           renderItem={({ item, index }) => (
-            <StyledSwitchWrapper>
-              <StyledRegularText>{item.name}</StyledRegularText>
-              <Switch
-                {...switchStyles()}
-                value={item.selected}
-                onValueChange={(newValue) =>
-                  handleSelectedApisUpdate(newValue, index)
-                }
-                activeText={t('preferences.off')}
-                inActiveText={t('preferences.on')}
-              />
-            </StyledSwitchWrapper>
+            <Switch
+              label={item.name}
+              value={item.selected}
+              onValueChange={(newValue) =>
+                handleSelectedApisUpdate(newValue, index)
+              }
+              activeText={t('preferences.off')}
+              inActiveText={t('preferences.on')}
+            />
           )}
           refreshControl={
             <RefreshControl
@@ -163,30 +146,22 @@ const UserPreferences = () => {
       <StyledUserPreferencesContent>
         <View>
           <StyledTitleText>{t('preferences.settings')}</StyledTitleText>
-          <StyledSwitchWrapper>
-            <StyledRegularText>
-              {t('preferences.temperatureUnit')}
-            </StyledRegularText>
-            <Switch
-              {...switchStyles()}
-              value={isFahrenheit}
-              onValueChange={(newIsFahrenheit) =>
-                toggleTemperatureUnits(newIsFahrenheit)
-              }
-              activeText={t('preferences.celsius')}
-              inActiveText={t('preferences.fahrenheit')}
-            />
-          </StyledSwitchWrapper>
-          <StyledSwitchWrapper>
-            <StyledRegularText>{t('preferences.language')}</StyledRegularText>
-            <Switch
-              {...switchStyles()}
-              value={isPt}
-              onValueChange={(newIsPt) => toggleLocale(newIsPt)}
-              activeText={t('preferences.english')}
-              inActiveText={t('preferences.portuguese')}
-            />
-          </StyledSwitchWrapper>
+          <Switch
+            label={t('preferences.temperatureUnit')}
+            value={isFahrenheit}
+            onValueChange={(newIsFahrenheit) =>
+              toggleTemperatureUnits(newIsFahrenheit)
+            }
+            activeText={t('preferences.celsius')}
+            inActiveText={t('preferences.fahrenheit')}
+          />
+          <Switch
+            label={t('preferences.language')}
+            value={isPt}
+            onValueChange={(newIsPt) => toggleLocale(newIsPt)}
+            activeText={t('preferences.english')}
+            inActiveText={t('preferences.portuguese')}
+          />
         </View>
         <StyledApis>
           <StyledTitleText>{t('preferences.weatherSources')}</StyledTitleText>

@@ -7,7 +7,7 @@ import {
   StyledSubText,
   StyledTitleText,
 } from '../../themes/global-styles'
-import { useTheme } from 'styled-components';
+import { useTheme } from 'styled-components/native'
 import {
   getMoonPhase,
   getRelativeUnits,
@@ -17,6 +17,7 @@ import {
   toPascalCase,
 } from '../../utils'
 import * as Images from '../../assets/weather-icons'
+import i18n from '../../i18n'
 import {
   StyledCard,
   StyledCardTouch,
@@ -36,8 +37,9 @@ import {
 } from './StyledWeatherCard'
 
 const WeatherCard = ({ weatherInfo, apiName, selectedTime, onPress }) => {
-  const { t, isFahrenheit } = useContext(PreferencesContext)
-  const theme = useTheme();
+  const { isFahrenheit } = useContext(PreferencesContext)
+  const theme = useTheme()
+  const t = i18n.t
 
   const getIcon = (apiName, icon) => {
     try {
@@ -75,10 +77,8 @@ const WeatherCard = ({ weatherInfo, apiName, selectedTime, onPress }) => {
           {getTemperatureUnits(weatherInfo.temperatureMin, isFahrenheit)}
         </StyledRegularText>
       </StyledIconTextWrapper>
-
       <StyledIconTextWrapper>
         <StyledIcon name='temperature-high' size={16} color='#b33030' />
-
         <StyledRegularText>
           {getTemperatureUnits(weatherInfo.temperatureMax, isFahrenheit)}
         </StyledRegularText>
@@ -103,57 +103,52 @@ const WeatherCard = ({ weatherInfo, apiName, selectedTime, onPress }) => {
     )
   }
 
+  const WeatherDetailsItem = ({ icon, text, titleText }) => (
+    <StyledIconTextWrapper>
+      {icon ? (
+        <StyledIcon name={icon} size={17} color={theme.colors.font} />
+      ) : (
+        <StyledTitleText
+          style={{ paddingRight: 5, fontWeight: '700', fontSize: 14 }}
+        >
+          UV
+        </StyledTitleText>
+      )}
+      <StyledWeatherText>{text}</StyledWeatherText>
+    </StyledIconTextWrapper>
+  )
+
   const renderWeatherDetails = () => (
     <StyledWeatherDetails>
       <StyledWeatherDetailsColumn>
-        <StyledIconTextWrapper>
-          <StyledIcon name='wind' size={17} color={theme.colors.font} />
-          <StyledWeatherText>
-            {`${getWindUnits(weatherInfo.windSpeed)} ${
-              weatherInfo.windDirection || '-'
-            }`}
-          </StyledWeatherText>
-        </StyledIconTextWrapper>
-
-        <StyledIconTextWrapper>
-          <StyledTitleText
-            style={{ paddingRight: 5, fontWeight: '700', fontSize: 14 }}
-          >
-            UV
-          </StyledTitleText>
-          <StyledWeatherText>
-            {getUvValue(weatherInfo.uvIndex)}
-          </StyledWeatherText>
-        </StyledIconTextWrapper>
-        <StyledIconTextWrapper>
-          <StyledIcon name='moon' size={16} color={theme.colors.font} />
-          <StyledWeatherText>
-            {getMoonPhase(weatherInfo.moonPhase)}
-          </StyledWeatherText>
-        </StyledIconTextWrapper>
+        <WeatherDetailsItem
+          icon='wind'
+          text={`${getWindUnits(weatherInfo.windSpeed)} ${
+            weatherInfo.windDirection || '-'
+          }`}
+        />
+        <WeatherDetailsItem
+          titleText='UV'
+          text={getUvValue(weatherInfo.uvIndex)}
+        />
+        <WeatherDetailsItem
+          icon='moon'
+          text={getMoonPhase(weatherInfo.moonPhase)}
+        />
       </StyledWeatherDetailsColumn>
       <StyledWeatherDetailsColumn>
-        <StyledIconTextWrapper>
-          <StyledIcon name='tint' size={16} color={theme.colors.font} />
-          <StyledWeatherText>
-            {getRelativeUnits(weatherInfo.humidity)}
-          </StyledWeatherText>
-        </StyledIconTextWrapper>
-        <StyledIconTextWrapper>
-          <StyledIcon name='cloud-rain' size={16} color={theme.colors.font} />
-          <StyledWeatherText>
-            {getRelativeUnits(weatherInfo.precipitationIntensity)}
-          </StyledWeatherText>
-        </StyledIconTextWrapper>
-        <StyledIconTextWrapper>
-          <Icon name='umbrella' size={16} color={theme.colors.font} />
-          <StyledWeatherText style={{ paddingRight: 5, fontWeight: '700' }}>
-            ?
-          </StyledWeatherText>
-          <StyledWeatherText>
-            {getRelativeUnits(weatherInfo.precipitationProbability)}
-          </StyledWeatherText>
-        </StyledIconTextWrapper>
+        <WeatherDetailsItem
+          icon='tint'
+          text={getRelativeUnits(weatherInfo.humidity)}
+        />
+        <WeatherDetailsItem
+          icon='cloud-rain'
+          text={getRelativeUnits(weatherInfo.precipitationIntensity)}
+        />
+        <WeatherDetailsItem
+          icon='umbrella'
+          text={getRelativeUnits(weatherInfo.precipitationProbability)}
+        />
       </StyledWeatherDetailsColumn>
     </StyledWeatherDetails>
   )
