@@ -1,6 +1,6 @@
 # weatherison mobile
 
-Mobile app developed with React NAtive, Expo and Styled Components to compare the weather forecast retrieved from the following weather APIs:
+Mobile app developed with React Native, Expo and Styled Components to compare the weather forecast retrieved from the following weather APIs:
 
 - accuweather
 - dark sky
@@ -14,6 +14,8 @@ The user can select which APIs want to consult and the default screen shows the 
 The expo-location is used to get user's location and display the forecast for this location by default. In addition, forecast information can be obtained to any location, by typing `city` and `country` in the search field.
 
 This app uses i18n and can be visualized either in english or in portuguese. Temperature can be observed in `celsius`or `fahrenheit` degrees
+
+![weatherison-mobile-overview](https://user-images.githubusercontent.com/43031902/124001501-99b0f900-d9cc-11eb-95e3-06dc429b6020.png)
 
 ## Project setup
 ```
